@@ -13,8 +13,8 @@ services:
       - pg_data:/var/lib/postgresql/data
     restart: always
   backend:
-    build: ./backend/
     env_file: .env
+    build: ./backend/
     volumes:
       - static:/backend_static
       - media:/app/media
@@ -31,8 +31,8 @@ services:
       - backend
     restart: always
   gateway:
-    build: ./nginx/
     env_file: .env
+    build: ./nginx/
     ports:
       - 9000:80
     volumes:
