@@ -27,8 +27,6 @@ services:
     command: cp -r /app/build/. /frontend_static/
     volumes:
       - static:/frontend_static
-    depends_on:
-      - backend
     restart: always
   gateway:
     env_file: .env
