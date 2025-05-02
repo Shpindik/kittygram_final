@@ -39,37 +39,66 @@ export const AddCardPage = ({ extraClass = "" }) => {
     e.target.name === "image" && setCurrentFileName(e.target.value);
   };
 
-  const handleResponse = (res) => {
-    if (typeof res.name === "object") {
-      setErrorName("Поле с именем является обязательным");
-    } else if (typeof res.birth_year === "object") {
-      setErrorAge("Поле с годом рождения является обязательным");
-    }
+  const compressImage = (file, maxWidth = 800, quality = 0.7) => {
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.src = e.target.result;
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          const ctx = canvas.getContext('2d');
+          
+          // Масштабируем изображение
+          const scale = Math.min(maxWidth / img.width, 1);
+          canvas.width = img.width * scale;
+          canvas.height = img.height * scale;
+          
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+          
+          canvas.toBlob(
+            (blob) => {
+              const reader = new FileReader();
+              reader.onload = () => resolve(reader.result);
+              reader.readAsDataURL(blob);
+            },
+            'image/jpeg',
+            quality
+          );
+        };
+      };
+      reader.readAsDataURL(file);
+    });
   };
-
-  const handleSubmit = () => {
+  
+  const handleSubmit = async () => {
     errorAge && setErrorAge("");
     errorName && setErrorName("");
-
+  
     const photo = document.querySelector('input[type="file"]').files[0];
-    photo
-      ? getBase64(photo).then((data) => {
-          card["image"] = data;
-          sendCard(card)
-            .then((res) => {
-              if (res && res.id) {
-                history.push(`/cats/${res.id}`);
-              }
-            })
-            .catch(handleResponse);
+    
+    if (photo) {
+      try {
+        const compressedBase64 = await compressImage(photo);
+        card["image"] = compressedBase64;
+        
+        if (compressedBase64.length > 20 * 1024 * 1024) {
+          alert("Изображение слишком большое после сжатия!");
+          return;
+        }
+        
+        const res = await sendCard(card);
+        if (res?.id) history.push(`/cats/${res.id}`);
+      } catch (err) {
+        handleResponse(err);
+      }
+    } else {
+      sendCard(card)
+        .then((res) => {
+          if (res?.id) history.push(`/cats/${res.id}`);
         })
-      : sendCard(card)
-          .then((res) => {
-            if (res && res.id) {
-              history.push(`/cats/${res.id}`);
-            }
-          })
-          .catch(handleResponse);
+        .catch(handleResponse);
+    }
   };
 
   return (
