@@ -39,6 +39,14 @@ export const AddCardPage = ({ extraClass = "" }) => {
     e.target.name === "image" && setCurrentFileName(e.target.value);
   };
 
+  const handleResponse = (res) => {
+    if (typeof res.name === "object") {
+      setErrorName("Поле с именем является обязательным");
+    } else if (typeof res.birth_year === "object") {
+      setErrorAge("Поле с годом рождения является обязательным");
+    }
+  };
+
   const compressImage = (file, maxWidth = 800, quality = 0.7) => {
     return new Promise((resolve) => {
       const reader = new FileReader();
@@ -49,7 +57,6 @@ export const AddCardPage = ({ extraClass = "" }) => {
           const canvas = document.createElement('canvas');
           const ctx = canvas.getContext('2d');
           
-          // Масштабируем изображение
           const scale = Math.min(maxWidth / img.width, 1);
           canvas.width = img.width * scale;
           canvas.height = img.height * scale;
