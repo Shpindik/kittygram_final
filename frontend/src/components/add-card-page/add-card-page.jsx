@@ -128,7 +128,7 @@ export const AddCardPage = ({ extraClass = "" }) => {
           <p className="text text_type_medium-16 text_color_primary">
             {currentFileName
               ? currentFileName
-              : "Загрузите фото в фотрмате JPG"}
+              : "Загрузите фото тут"}
           </p>
         </label>
         <input
